@@ -1,9 +1,5 @@
-const express = require('express');
 const { Pool } = require('pg');
 require('dotenv').config();
-
-const app = express();
-const PORT = process.env.PORT || 3000;
 
 // PostgreSQL connection config
 const pool = new Pool({
@@ -14,17 +10,25 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
-// GET /api/users → return { data: [...] }
-app.get('/api/users', async (req, res) => {
+// Native function to fetch users
+async function fetchUsers() {
   try {
     const result = await pool.query('SELECT name FROM users');
-    res.json({ data: result.rows });
+    return result.rows;
   } catch (error) {
     console.error('Error fetching users:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    throw error;
   }
-});
+}
 
-app.listen(PORT, () => {
-  console.log(`Server is running at http://localhost:${PORT}`);
-});
+// IIFE to call the function
+(async () => {
+  try {
+    const users = await fetchUsers();
+    console.log('Users:', users);
+  } catch (err) {
+    console.error('Failed to fetch users:', err.message);
+  } finally {
+    await pool.end(); // Close the DB connection
+  }
+})();
