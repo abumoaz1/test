@@ -16,7 +16,7 @@ const pool = new Pool({
 // Native function to fetch users
 async function fetchUsers() {
   try {
-    const result = await pool.query('SELECT name FROM users');
+    const result = await pool.query('SELECT full_name, email FROM users');
     return result.rows;
   } catch (error) {
     console.error('Error fetching users:', error);
